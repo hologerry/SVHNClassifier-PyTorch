@@ -20,8 +20,10 @@ class Evaluator(object):
 
         with torch.no_grad():
             for batch_idx, (images, length_labels, digits_labels) in enumerate(self._loader):
-                images, length_labels, digits_labels = images.cuda(), length_labels.cuda(), [digit_labels.cuda() for digit_labels in digits_labels]
-                length_logits, digit1_logits, digit2_logits, digit3_logits, digit4_logits, digit5_logits = model.eval()(images)
+                images, length_labels, digits_labels = \
+                    images.cuda(), length_labels.cuda(), [digit_labels.cuda() for digit_labels in digits_labels]
+                length_logits, digit1_logits, digit2_logits, digit3_logits, digit4_logits, digit5_logits = \
+                    model.eval()(images)
 
                 length_prediction = length_logits.max(1)[1]
                 digit1_prediction = digit1_logits.max(1)[1]

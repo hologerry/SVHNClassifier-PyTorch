@@ -27,7 +27,7 @@ parser.add_argument('-bs', '--batch_size', default=32,
 parser.add_argument('-lr', '--learning_rate', default=1e-2,
                     type=float, help='Default 1e-2')
 parser.add_argument('-p', '--patience', default=100, type=int,
-                    help='Default 100, set -1 to train infinitely')
+                    help='Default 100, set -1 to train infinitely, accuracy does not change')
 parser.add_argument('-ds', '--decay_steps', default=10000,
                     type=int, help='Default 10000')
 parser.add_argument('-dr', '--decay_rate', default=0.9,
@@ -91,10 +91,13 @@ def _train(path_to_train_lmdb_dir, path_to_val_lmdb_dir, path_to_log_dir,
         print('Model restored from file: %s' % path_to_restore_checkpoint_file)
 
     path_to_losses_npy_file = os.path.join(path_to_log_dir, 'losses.npy')
+    path_to_accuracies_npy_file = os.path.join(path_to_log_dir, 'accuracies.npy')
     if os.path.isfile(path_to_losses_npy_file):
         losses = np.load(path_to_losses_npy_file)
+        accuracies = np.load(path_to_accuracies_npy_file)
     else:
         losses = np.empty([0], dtype=np.float32)
+        accuracies = np.empty([0], dtype=np.float32)
 
     while True:
         for batch_idx, (images, length_labels, digits_labels) in enumerate(train_loader):
@@ -127,6 +130,8 @@ def _train(path_to_train_lmdb_dir, path_to_val_lmdb_dir, path_to_log_dir,
 
             print('=> Evaluating on validation dataset...')
             accuracy = evaluator.evaluate(model)
+            accuracies = np.append(accuracies, accuracy)
+            np.save(path_to_accuracies_npy_file, accuracies)
             print('==> accuracy = %f, best accuracy %f' %
                   (accuracy, best_accuracy))
 
