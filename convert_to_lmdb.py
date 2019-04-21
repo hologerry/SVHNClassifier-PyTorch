@@ -12,7 +12,8 @@ import example_pb2
 from meta import Meta
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--data_dir', default='./data', help='directory to SVHN (format 1) folders and write the converted files')
+parser.add_argument('-d', '--data_dir', default='./data',
+                    help='directory to SVHN (format 1) folders and write the converted files')
 
 
 class ExampleReader(object):
@@ -67,7 +68,8 @@ class ExampleReader(object):
         for idx, label_of_digit in enumerate(label_of_digits):
             digits[idx] = int(label_of_digit if label_of_digit != 10 else 0)    # label 10 is essentially digit zero
 
-        attrs_left, attrs_top, attrs_width, attrs_height = map(lambda x: [int(i) for i in x], [attrs['left'], attrs['top'], attrs['width'], attrs['height']])
+        attrs_left, attrs_top, attrs_width, attrs_height = \
+            map(lambda x: [int(i) for i in x], [attrs['left'], attrs['top'], attrs['width'], attrs['height']])
         min_left, min_top, max_right, max_bottom = (min(attrs_left),
                                                     min(attrs_top),
                                                     max(map(lambda x, y: x + y, attrs_left, attrs_width)),
@@ -79,7 +81,8 @@ class ExampleReader(object):
                                                         center_y - max_side / 2.0,
                                                         max_side,
                                                         max_side)
-        image = np.array(ExampleReader._preprocess(Image.open(path_to_image_file), bbox_left, bbox_top, bbox_width, bbox_height)).tobytes()
+        image = np.array(ExampleReader._preprocess(Image.open(path_to_image_file),
+                         bbox_left, bbox_top, bbox_width, bbox_height)).tobytes()
 
         example = example_pb2.Example()
         example.image = image
@@ -133,11 +136,10 @@ def convert_to_lmdb(path_to_dataset_dir_and_digit_struct_mat_file_tuples,
     return num_examples
 
 
-def create_lmdb_meta_file(num_train_examples, num_val_examples, num_test_examples, path_to_lmdb_meta_file):
+def create_lmdb_meta_file(num_train_examples, num_test_examples, path_to_lmdb_meta_file):
     print('Saving meta file to %s...' % path_to_lmdb_meta_file)
     meta = Meta()
     meta.num_train_examples = num_train_examples
-    meta.num_val_examples = num_val_examples
     meta.num_test_examples = num_test_examples
     meta.save(path_to_lmdb_meta_file)
 
@@ -145,30 +147,29 @@ def create_lmdb_meta_file(num_train_examples, num_val_examples, num_test_example
 def main(args):
     path_to_train_dir = os.path.join(args.data_dir, 'train')
     path_to_test_dir = os.path.join(args.data_dir, 'test')
-    path_to_extra_dir = os.path.join(args.data_dir, 'extra')
+    # path_to_extra_dir = os.path.join(args.data_dir, 'extra')
     path_to_train_digit_struct_mat_file = os.path.join(path_to_train_dir, 'digitStruct.mat')
     path_to_test_digit_struct_mat_file = os.path.join(path_to_test_dir, 'digitStruct.mat')
-    path_to_extra_digit_struct_mat_file = os.path.join(path_to_extra_dir, 'digitStruct.mat')
+    # path_to_extra_digit_struct_mat_file = os.path.join(path_to_extra_dir, 'digitStruct.mat')
 
     path_to_train_lmdb_dir = os.path.join(args.data_dir, 'train.lmdb')
-    path_to_val_lmdb_dir = os.path.join(args.data_dir, 'val.lmdb')
+    # path_to_val_lmdb_dir = os.path.join(args.data_dir, 'val.lmdb')
     path_to_test_lmdb_dir = os.path.join(args.data_dir, 'test.lmdb')
     path_to_lmdb_meta_file = os.path.join(args.data_dir, 'lmdb_meta.json')
 
-    for path_to_dir in [path_to_train_lmdb_dir, path_to_val_lmdb_dir, path_to_test_lmdb_dir]:
+    for path_to_dir in [path_to_train_lmdb_dir, path_to_test_lmdb_dir]:
         assert not os.path.exists(path_to_dir), 'LMDB directory %s already exists' % path_to_dir
 
     print('Processing training and validation data...')
-    [num_train_examples, num_val_examples] = convert_to_lmdb([(path_to_train_dir, path_to_train_digit_struct_mat_file),
-                                                              (path_to_extra_dir, path_to_extra_digit_struct_mat_file)],
-                                                             [path_to_train_lmdb_dir, path_to_val_lmdb_dir],
-                                                             lambda paths: 0 if random.random() > 0.1 else 1)
+    [num_train_examples] = convert_to_lmdb([(path_to_train_dir, path_to_train_digit_struct_mat_file)],
+                                           [path_to_train_lmdb_dir],
+                                           lambda paths: 0 if random.random() > 0.1 else 1)
     print('Processing test data...')
     [num_test_examples] = convert_to_lmdb([(path_to_test_dir, path_to_test_digit_struct_mat_file)],
                                           [path_to_test_lmdb_dir],
                                           lambda paths: 0)
 
-    create_lmdb_meta_file(num_train_examples, num_val_examples, num_test_examples, path_to_lmdb_meta_file)
+    create_lmdb_meta_file(num_train_examples, num_test_examples, path_to_lmdb_meta_file)
 
     print('Done')
 
