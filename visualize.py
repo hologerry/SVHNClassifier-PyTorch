@@ -15,9 +15,8 @@ def _visualize(path_to_log_dir):
     losses = np.load(os.path.join(path_to_log_dir, 'losses.npy'))
     accuracies = np.load(os.path.join(path_to_log_dir, 'accuracies.npy'))
 
-    num_steps_to_check = 1000
     x_loss = [i for i in range(len(losses))]
-    x_acc = [i*num_steps_to_check for i in range(len(accuracies))]
+    x_acc = [i for i in range(len(accuracies))]
     loss_data = pd.DataFrame({"step": x_loss, "loss": losses})
     acc_data = pd.DataFrame({"step": x_acc, "accuracy": accuracies})
     fig, axs = plt.subplots(ncols=2)
