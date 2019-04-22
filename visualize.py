@@ -17,9 +17,9 @@ def _visualize(path_to_log_dir):
 
     num_steps_to_check = 1000
     x_loss = [i for i in range(len(losses))]
-    x_acc = [i for i in range(len(accuracies))]
+    x_acc = [i*num_steps_to_check for i in range(len(accuracies))]
     loss_data = pd.DataFrame({"step": x_loss, "loss": losses})
-    acc_data = pd.DataFrame({"step": x_acc*num_steps_to_check, "accuracy": accuracies})
+    acc_data = pd.DataFrame({"step": x_acc, "accuracy": accuracies})
     fig, axs = plt.subplots(ncols=2)
     sns.lineplot(x='step', y='loss', data=loss_data, ax=axs[0])
     sns.lineplot(x='step', y='accuracy', data=acc_data, ax=axs[1])
