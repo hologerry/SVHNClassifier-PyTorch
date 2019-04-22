@@ -5,7 +5,7 @@ from evaluator import Evaluator
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--data_dir', default='./data', help='directory to read LMDB files')
-parser.add_argument('checkpoint', type=str, help='path to evaluate checkpoint, e.g. ./logs/model-100.pth')
+parser.add_argument('-c', '--checkpoint', default='./logs/model-442000.pth', type=str, help='path to evaluate checkpoint, e.g. ./logs/model-442000.pth')
 
 
 def _eval(path_to_checkpoint_file, path_to_eval_lmdb_dir):
